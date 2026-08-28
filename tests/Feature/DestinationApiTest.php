@@ -3,14 +3,23 @@
 namespace Tests\Feature;
 
 use App\Models\Destination;
+use App\Models\User;
 use Database\Seeders\DestinationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class DestinationApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Sanctum::actingAs(User::factory()->create(), ['destinations:read']);
+    }
 
     public function test_it_lists_database_destinations_with_pagination_metadata(): void
     {
