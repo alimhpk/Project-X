@@ -7,9 +7,13 @@ use Livewire\Component;
 class DestinationExplorer extends Component
 {
     public $destinations = [];
+
     public $filteredDestinations = [];
+
     public $searchTerm = '';
+
     public $sortField = '';
+
     public $sortDirection = 'asc';
 
     public function mount()
@@ -27,6 +31,7 @@ class DestinationExplorer extends Component
 
         if (empty($searchTerm)) {
             $this->filteredDestinations = $this->destinations;
+
             return;
         }
 

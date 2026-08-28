@@ -10,22 +10,50 @@
 
 This is a [Laravel](https://laravel.com/) project using [Livewire](https://livewire.laravel.com/) for reactive UI components.
 
+## Requirements
+
+- PHP 8.3 or newer with the `pdo_mysql`, `pdo_sqlite`, `mbstring`, `intl` and `bcmath` extensions
+- Composer 2
+- Node 22 (Vite 8 needs Node 20.19 or newer)
+- MySQL 8, either from the provided Docker Compose file or a local server
+
 ## Getting Started
 
-Install PHP dependencies:
+1. Install PHP dependencies:
 
 ```bash
 composer install
 ```
 
-Install front-end dependencies and build assets:
+2. Create your environment file and application key:
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+3. Start MySQL:
+
+```bash
+docker compose up -d
+```
+
+The `DB_*` values in `.env.example` already match this container. If you use your own MySQL server, create the `pe_destinations` database and update the `DB_*` values in `.env`.
+
+4. Run migrations and seed the destinations:
+
+```bash
+php artisan migrate --seed
+```
+
+5. Install front-end dependencies and build assets:
 
 ```bash
 npm install
 npm run build
 ```
 
-Run the development server:
+6. Run the development server:
 
 ```bash
 php artisan serve
@@ -37,44 +65,17 @@ For live asset rebuilding during development:
 npm run dev
 ```
 
-## Database Setup
+`composer run setup` runs all of the steps above in one go.
 
-The app is configured to return a default list of destinations from hardcoded data. This will allow you to get the app up and running without needing to configure a database. If you'd like to configure a database, you're encouraged to do so. You can uncomment the database connection in `.env` and the Eloquent query in `app/Livewire/DestinationExplorer.php` to retrieve destinations from the database.
-
-1. A `docker-compose.yml` is provided for MySQL. Start it with:
+## Tests and Checks
 
 ```bash
-docker compose up -d
+php artisan test
+vendor/bin/pint --test
+npm run build
 ```
 
-2. Uncomment the MySQL connection settings in `.env`:
-
-```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=pe_destinations
-DB_USERNAME=laravel
-DB_PASSWORD=password
-```
-
-3. Run migrations:
-
-```bash
-php artisan migrate
-```
-
-4. Seed the database:
-
-```bash
-php artisan db:seed
-```
-
-Or use the API endpoint:
-
-```bash
-curl -X POST http://localhost:8000/api/seed
-```
+Tests use an in-memory SQLite database, so they do not need MySQL. The same checks run in GitHub Actions on every push and pull request.
 
 ---
 
