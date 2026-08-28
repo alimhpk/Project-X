@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Destination;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,9 +21,12 @@ class DestinationExplorer extends Component
 
     public string $sortDirection = 'asc';
 
+    #[Locked]
+    public string $viewMode = 'grid';
+
     public function updated(string $property): void
     {
-        if (in_array($property, ['searchTerm', 'region', 'costLevel'], true)) {
+        if (in_array($property, ['searchTerm', 'region', 'costLevel', 'sortField', 'sortDirection'], true)) {
             $this->resetPage();
         }
     }
@@ -38,6 +42,13 @@ class DestinationExplorer extends Component
         $this->resetPage();
     }
 
+    public function setViewMode(string $mode): void
+    {
+        if (in_array($mode, ['grid', 'list'], true)) {
+            $this->viewMode = $mode;
+        }
+    }
+
     public function resetFilters(): void
     {
         $this->reset('searchTerm', 'region', 'costLevel', 'sortField', 'sortDirection');
@@ -46,14 +57,14 @@ class DestinationExplorer extends Component
 
     public function render()
     {
-        $column = Destination::SORTS[$this->sortField] ?? 'name';
-        $direction = in_array($this->sortDirection, ['asc', 'desc'], true) ? $this->sortDirection : 'asc';
+        $sortField = array_key_exists($this->sortField, Destination::SORTS) ? $this->sortField : 'name';
+        $sortDirection = in_array($this->sortDirection, ['asc', 'desc'], true) ? $this->sortDirection : 'asc';
 
         $destinations = Destination::query()
             ->search($this->searchTerm)
             ->when($this->region, fn ($query, $region) => $query->where('region', $region))
             ->when($this->costLevel, fn ($query, $costLevel) => $query->where('cost_level', $costLevel))
-            ->orderBy($column, $direction)
+            ->orderBy(Destination::SORTS[$sortField], $sortDirection)
             ->orderBy('id')
             ->paginate(10);
 
@@ -61,6 +72,9 @@ class DestinationExplorer extends Component
             'destinations' => $destinations,
             'regions' => Destination::query()->distinct()->orderBy('region')->pluck('region'),
             'costLevels' => Destination::COST_LEVELS,
+            'activeSort' => $sortField,
+            'activeDirection' => $sortDirection,
+            'hasActiveFilters' => $this->searchTerm !== '' || $this->region !== '' || $this->costLevel !== '',
         ]);
     }
 }
