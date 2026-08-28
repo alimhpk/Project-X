@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('country');
             $table->string('region');
             $table->string('cost_level');
-            $table->json('activities')->default('[]');
+            $table->json('activities');
             $table->integer('average_daily_budget');
             $table->bigInteger('annual_visitors');
             $table->timestamps();
